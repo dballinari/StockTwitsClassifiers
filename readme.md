@@ -26,7 +26,7 @@ making the predictions.
 The models are estimated using StockTwits messages mentioning one of 360 US stocks of the S&P 500. 
 For the estimation only messages from 2013-06-01 to 2014-08-31 are used; this matches the data 
 estimation window used by [Renault (2017)](https://www.sciencedirect.com/science/article/abs/pii/S0378426617301589).
-An oversampling technique is then used to create a balanced train data set. 
+An undersampling technique is then used to create a balanced train data set. 
 The models are estimated by running the script `model_estimation.py`. The textual data is vectorized 
 by using a bag-of-words approach. More precisely, one- and two-grams are considered and word-document 
 matrix is constructed using TF-IDF. The dictionary of words considered is defined using only training
