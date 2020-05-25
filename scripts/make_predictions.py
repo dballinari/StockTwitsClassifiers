@@ -62,22 +62,15 @@ for data_i in th_stocktwits.text_generator(emojis_positive, emojis_negative, est
     # Make predictions:
     data_i['logistic'] = (logistic.predict(x_i) - 0.5) * 2
     data_i['naive_bayes'] = (predict_in_chunks(naive_bayes, x_i, 10000) - 0.5) * 2
-    # For the aggregation, we shift the date of messages posted during holidays or weekends to the next trading day:
-    data_i = data_i.merge(closing_info, how='left', left_on='date_out', right_on='date')[
-        ['rpid', 'date', 'closed', 'logistic', 'naive_bayes']]
-    while any(data_i.closed):
-        data_i['date'] = data_i.apply(lambda x: x['date'] + timedelta(days=1) if x['closed'] else x['date'],
-                                      axis=1)
-        data_i = data_i.drop('closed', axis=1).merge(closing_info, how='left', on='date')
-    # Aggregate sentiments on a daily basis:
-    sentiment_i = data_i.drop(['closed', 'rpid'], axis=1).groupby('date').aggregate(
-        {'logistic': [bull, np.mean], 'naive_bayes': [bull, np.mean]})
+    # Aggregate sentiment
+    sentiment_i = data_i[['date_out', 'logistic', 'naive_bayes']].rename(columns={'date_out': 'date'}). \
+        groupby('date').aggregate({'logistic': [bull, np.mean], 'naive_bayes': [bull, np.mean]})
     # Transform multi-index column names to single level:
     sentiment_i.columns = ['_'.join(col).strip() for col in sentiment_i.columns.values]
     # Date (which acts as an index) to a column:
     sentiment_i.reset_index(level=0, inplace=True)
     # Add information about RavenPack ID:
-    sentiment_i['rpid'] = data_i['rpid'][0]
+    sentiment_i['rpid'] = data_i['rpid'].iloc[0]
     # Append data:
     sentiment_stocktwits = sentiment_stocktwits.append(sentiment_i, ignore_index=True)
 
@@ -109,22 +102,15 @@ for data_i in th_twitter.text_generator(emojis_positive, emojis_negative, estima
     # Make predictions:
     data_i['logistic'] = (logistic.predict(x_i) - 0.5) * 2
     data_i['naive_bayes'] = (predict_in_chunks(naive_bayes, x_i, 10000) - 0.5) * 2
-    # For the aggregation, we shift the date of messages posted during holidays or weekends to the next trading day:
-    data_i = data_i.merge(closing_info, how='left', left_on='date_out', right_on='date')[
-        ['rpid', 'date', 'closed', 'logistic', 'naive_bayes']]
-    while any(data_i.closed):
-        data_i['date'] = data_i.apply(lambda x: x['date'] + timedelta(days=1) if x['closed'] else x['date'],
-                                      axis=1)
-        data_i = data_i.drop('closed', axis=1).merge(closing_info, how='left', on='date')
-    # Aggregate sentiments on a daily basis:
-    sentiment_i = data_i.drop(['closed', 'rpid'], axis=1).groupby('date').aggregate(
-        {'logistic': [bull, np.mean], 'naive_bayes': [bull, np.mean]})
+    # Aggregate sentiment
+    sentiment_i = data_i[['date_out', 'logistic', 'naive_bayes']].rename(columns={'date_out': 'date'}). \
+        groupby('date').aggregate({'logistic': [bull, np.mean], 'naive_bayes': [bull, np.mean]})
     # Transform multi-index column names to single level:
     sentiment_i.columns = ['_'.join(col).strip() for col in sentiment_i.columns.values]
     # Date (which acts as an index) to a column:
     sentiment_i.reset_index(level=0, inplace=True)
     # Add information about RavenPack ID:
-    sentiment_i['rpid'] = data_i['rpid'][0]
+    sentiment_i['rpid'] = data_i['rpid'].iloc[0]
     # Append data:
     sentiment_twitter = sentiment_twitter.append(sentiment_i, ignore_index=True)
 
